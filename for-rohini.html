@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Only For Rohini 👑</title>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+<style>
+    body {
+        margin: 0;
+        font-family: 'Georgia', serif;
+        background: radial-gradient(circle, #ff1e1e, #3a0000);
+        color: white;
+        text-align: center;
+        overflow: hidden;
+        height: 100vh;
+    }
+
+    .nickname-layer {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+    }
+    .float-name {
+        position: absolute;
+        color: rgba(255, 255, 255, 0.4);
+        font-weight: bold;
+        animation: floatUp linear infinite;
+    }
+    @keyframes floatUp {
+        from { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+        20% { opacity: 0.6; }
+        80% { opacity: 0.6; }
+        to { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
+    }
+
+    .overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        padding: 20px;
+        z-index: 1000;
+    }
+
+    @keyframes heartbeat {
+        0% { transform: scale(1); }
+        15% { transform: scale(1.3); }
+        30% { transform: scale(1); }
+        45% { transform: scale(1.3); }
+        100% { transform: scale(1); }
+    }
+
+    .heart-beat {
+        animation: heartbeat 1.2s infinite;
+        background: white !important;
+        color: #b90000 !important;
+        box-shadow: 0 0 20px #fff;
+    }
+
+    .bomb-explosion {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 10rem;
+        z-index: 3000;
+        display: none;
+    }
+
+    .emoji-blast {
+        position: fixed;
+        font-size: 4rem;
+        z-index: 2500;
+        animation: blastOut 1.5s forwards ease-out;
+    }
+
+    @keyframes blastOut {
+        0% { transform: translate(0, 0) scale(1); opacity: 1; }
+        100% { transform: translate(var(--tx), var(--ty)) scale(2); opacity: 0; }
+    }
+
+    .treasure-box {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        max-width: 360px;
+        color: #4a0000;
+        box-shadow: 0 10px 30px rgba(0,0,0,.4);
+    }
+
+    .warning-box {
+        background: #1a0000;
+        border: 4px solid red;
+        padding: 30px;
+        border-radius: 20px;
+        color: white;
+    }
+
+    .btn-main {
+        padding: 15px 35px;
+        border: none;
+        border-radius: 50px;
+        font-weight: bold;
+        cursor: pointer;
+        background: #b90000;
+        color: white;
+        margin: 10px;
+        z-index: 10;
+    }
+
+    #noBtn {
+        background: #444; color: #ddd;
+        position: absolute;
+        transition: all 0.2s ease;
+    }
+
+    .letter-content {
+        background: #fff0f3;
+        color: #b90000;
+        padding: 25px;
+        border-radius: 15px;
+        max-width: 450px;
+        text-align: left;
+        line-height: 1.5;
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+
+    #yesGrid {
+        display: none;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    video {
+        width: 90%;
+        max-width: 500px;
+        border-radius: 15px;
+        box-shadow: 0 0 20px rgba(255,255,255,0.3);
+        margin-bottom: 20px;
+    }
+</style>
+</head>
+<body>
+
+<audio id="bgMusic" loop>
+    <source src="https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO_NAME/main/music.mp3" type="audio/mp3">
+</audio>
+
+<div class="nickname-layer" id="nicknames"></div>
+<div id="explosion-center" class="bomb-explosion">💥</div>
+
+<div id="password-screen" class="overlay" style="display: flex; background: radial-gradient(circle,#ffd6e0,#4a0000);">
+    <div class="treasure-box">
+        <h2>🔐 Princess Treasure</h2>
+        <p>🎧 Wear headphones or set sound to 20%.</p>
+        <input type="password" id="passInput" placeholder="Enter Your Name..." style="padding:12px; width:85%; border-radius:10px; text-align:center;">
+        <button class="btn-main" onclick="unlock()">Unlock ❤️</button>
+        <p id="errorMsg" style="color:red; font-size:12px;"></p>
+    </div>
+</div>
+
+<div id="welcome-screen" class="overlay" style="background: radial-gradient(circle,#ffb3c1,#3a0000);">
+    <h1 style="font-size: 3rem;">Welcome Princess Rohini 👑</h1>
+</div>
+
+<div id="danger-screen" class="overlay" style="background: #000;">
+    <div class="warning-box">
+        <h1 style="color: red;">⚠️ EXTREME WARNING</h1>
+        <p>Proceeding is <b>entirely your responsibility</b>, Rohini.</p>
+        <button class="btn-main" onclick="showMain()" style="background:red;">I ACCEPT THE RISK</button>
+    </div>
+</div>
+
+<div id="main-screen" class="overlay">
+    <h1 style="font-size: 2.5rem;">Hey Rohini ❤️</h1>
+    <h2>Will you be my Valentine?</h2>
+    <div id="btnContainer" style="height:350px; width:100%; position:relative;">
+        <button id="yesBtn" class="btn-main heart-beat" onclick="startSequence()" style="left:50%; top:20%; transform:translateX(-50%); position:absolute;">YES ❤️</button>
+        <button id="noBtn" style="left:50%; top:60%; transform:translateX(-50%);">No</button>
+    </div>
+    <div id="yesGrid"></div>
+</div>
+
+<div id="countdown-screen" class="overlay" style="background: radial-gradient(circle,#ff758f,#2b0000);">
+    <div id="countdown-text" style="font-size: 8rem; font-weight: bold;">5</div>
+</div>
+
+<div id="video-screen" class="overlay">
+    <video id="princessVideo" controls>
+        <source src="https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO_NAME/main/video.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <button class="btn-main" onclick="showLetter()">Next 💌</button>
+</div>
+
+<div id="letter-screen" class="overlay">
+    <div class="letter-content">
+        <h3 style="text-align: center;">My Dearest Rohini ❤️</h3>
+        <p><b>I will never let go of you. ❤️</b></p>
+        <p style="text-align:right; font-weight:bold;">Forever Yours,<br>Surya ❤️</p>
+    </div>
+    <button class="btn-main" onclick="goFinal()">One Last Thing... 💋</button>
+</div>
+
+<div id="final-screen" class="overlay">
+    <h2>IVAR MUYARCHIYAI PARATI<br>LONG LIP LOCK THARALAMEA 💋❤️</h2>
+    <button class="btn-main heart-beat" onclick="addKiss(event)">Tap for Kisses 💋</button>
+</div>
+
+<script>
+    const music = document.getElementById("bgMusic");
+    const nicknames = ["mu", "alagi", "cupcake", "lifeline", "wifey", "mocha kutty", "thangamey", "chellam"];
+    let noCount = 0;
+
+    function createName() {
+        const span = document.createElement("span");
+        span.className = "float-name";
+        span.innerText = nicknames[Math.floor(Math.random()*nicknames.length)];
+        span.style.left = Math.random() * 90 + "vw";
+        span.style.fontSize = (Math.random() * 1.2 + 0.8) + "rem";
+        span.style.animationDuration = (Math.random() * 6 + 4) + "s";
+        document.getElementById("nicknames").appendChild(span);
+        setTimeout(() => span.remove(), 10000);
+    }
+    setInterval(createName, 700);
+
+    function unlock() {
+        if(document.getElementById("passInput").value.trim().toLowerCase() === "rohini") {
+            music.play().catch(e => console.log("Autoplay blocked"));
+            document.getElementById("password-screen").style.display = "none";
+            document.getElementById("welcome-screen").style.display = "flex";
+            confetti({particleCount: 150});
+            setTimeout(() => {
+                document.getElementById("welcome-screen").style.display = "none";
+                document.getElementById("danger-screen").style.display = "flex";
+            }, 2500);
+        } else {
+            document.getElementById("errorMsg").innerText = "Only for Surya's Princess 💔";
+        }
+    }
+
+    function showMain() {
+        document.getElementById("danger-screen").style.display = "none";
+        document.getElementById("main-screen").style.display = "flex";
+    }
+
+    const noBtn = document.getElementById("noBtn");
+    function moveNo() {
+        noCount++;
+        if(noCount >= 7) {
+            triggerBomb();
+        } else {
+            const x = Math.random() * (window.innerWidth - 100);
+            const y = Math.random() * (window.innerHeight - 50);
+            noBtn.style.position = "fixed";
+            noBtn.style.left = x + "px";
+            noBtn.style.top = y + "px";
+        }
+    }
+    noBtn.addEventListener("mouseover", moveNo);
+    noBtn.addEventListener("touchstart", moveNo);
+
+    function triggerBomb() {
+        noBtn.style.display = "none";
+        document.getElementById("yesBtn").style.display = "none";
+        const explosion = document.getElementById("explosion-center");
+        explosion.style.display = "block";
+        
+        for(let i=0; i<40; i++) {
+            const emo = document.createElement("div");
+            emo.className = "emoji-blast";
+            emo.innerText = i % 2 === 0 ? "😡" : "😭";
+            emo.style.left = "50%";
+            emo.style.top = "50%";
+            emo.style.setProperty('--tx', (Math.random() - 0.5) * 1200 + "px");
+            emo.style.setProperty('--ty', (Math.random() - 0.5) * 1200 + "px");
+            document.body.appendChild(emo);
+            setTimeout(() => emo.remove(), 1500);
+        }
+
+        setTimeout(() => {
+            explosion.style.display = "none";
+            const grid = document.getElementById("yesGrid");
+            grid.style.display = "flex";
+            for(let i=0; i<50; i++) {
+                const b = document.createElement("button");
+                b.className = "btn-main heart-beat";
+                b.innerText = "YES ❤️";
+                b.onclick = startSequence;
+                grid.appendChild(b);
+            }
+        }, 1000);
+    }
+
+    function startSequence() {
+        document.getElementById("main-screen").style.display = "none";
+        document.getElementById("countdown-screen").style.display = "flex";
+        let t = 5;
+        const x = setInterval(() => {
+            t--; document.getElementById("countdown-text").innerText = t;
+            if(t === 0) { 
+                clearInterval(x); 
+                document.getElementById("countdown-screen").style.display = "none"; 
+                document.getElementById("video-screen").style.display = "flex"; 
+                document.getElementById("princessVideo").play();
+                music.pause(); 
+            }
+        }, 1000);
+    }
+
+    function showLetter() {
+        document.getElementById("princessVideo").pause();
+        document.getElementById("video-screen").style.display = "none";
+        document.getElementById("letter-screen").style.display = "flex";
+        music.play();
+    }
+
+    function goFinal() {
+        document.getElementById("letter-screen").style.display = "none";
+        document.getElementById("final-screen").style.display = "flex";
+    }
+
+    function addKiss(e) {
+        const k = document.createElement("div");
+        k.style.position = "fixed";
+        k.style.left = (e.clientX || Math.random()*innerWidth) + "px";
+        k.style.top = (e.clientY || Math.random()*innerHeight) + "px";
+        k.style.fontSize = "3rem"; k.innerText = "💋"; 
+        document.body.appendChild(k);
+        k.animate([{transform:'scale(0)', opacity:1}, {transform:'scale(2) translateY(-100px)', opacity:0}], {duration:1000});
+        setTimeout(() => k.remove(), 1000);
+        confetti({ origin: { x: (e.clientX || innerWidth/2)/innerWidth, y: (e.clientY || innerHeight/2)/innerHeight } });
+    }
+</script>
+</body>
+</html>
