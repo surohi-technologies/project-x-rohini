@@ -838,6 +838,55 @@
                 opacity: 1;
             }
         }
+
+        .love-meter-container {
+            width: 80%;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            border: 2px solid #ff3232;
+            margin: 20px auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .love-meter-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff3232, #ff6b6b);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 15px #ff3232;
+        }
+
+        .crystal-heart {
+            font-size: 7rem;
+            cursor: pointer;
+            filter: drop-shadow(0 0 20px rgba(255, 50, 50, 0.6));
+            transition: transform 0.2s, filter 0.3s;
+            position: relative;
+            display: inline-block;
+            margin: 15px 0;
+            user-select: none;
+        }
+
+        .crystal-heart:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .crystal-heart:active {
+            transform: scale(0.9);
+        }
+
+        .quote-display {
+            font-size: 1.2rem;
+            font-style: italic;
+            min-height: 3.5rem;
+            margin-top: 15px;
+            color: #ffcccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 
@@ -944,17 +993,21 @@
     <div id="page4Love">
         <div class="silky-bg"></div>
         <div class="bokeh-container" id="bokehContainer"></div>
-        <div class="love-content-card">
-            <h1 style="font-size: 2.5rem; margin-bottom: 20px;">My Dearest Alagi... 💖</h1>
-            <p style="font-size: 1.3rem; line-height: 1.6;">
-                I didn't expect it but you did it so enjoy the whole gift! ❤️<br><br>
-                Please go back and select <b>"I am already yours"</b> to see your full surprise, my love.
-            </p>
-            <p class="lovely-note">
-                Meratti enna option nu kekkama effort podu di venna 😘😂
-            </p>
-            <button class="royal-btn" style="margin-top: 30px;" onclick="backToScroll('page4Love')">Check other options
-                also bby ❤️</button>
+        <div class="love-content-card" style="max-width: 500px;">
+            <h1 style="font-size: 2.2rem; margin-bottom: 15px;">Fill My Heart with Your Love! 💖</h1>
+
+            <div class="crystal-heart" onclick="fillLoveMeter()">💎❤️</div>
+
+            <div class="love-meter-container">
+                <div id="meterFill" class="love-meter-fill"></div>
+            </div>
+
+            <div id="quoteText" class="quote-display">Tap the crystal heart to fill it with your love...</div>
+
+            <div id="loveStatus" style="margin-top: 10px;"></div>
+
+            <button id="finalActionBtn" class="royal-btn" style="margin-top: 20px; display: none;"
+                onclick="backToScroll('page4Love')">Check other options also bby ❤️</button>
         </div>
     </div>
 
@@ -1028,7 +1081,15 @@
     <script>
         const names = ["alagi", "ro", "bby", "thangamea", "mu", "wifey", "precious", "cupcake", "lifeline", "chellam", "queen", "pondatti"];
         const prizes = ["Unlimited Head Massages 💆‍♂️", "Madurai Tour Special 🕌", "Luxury Shopping for a Day 🛍️", "Surprise Valentine Gift 🎁", "A Foreign Tour Together ✈️", "DIAMOND RING 💍 (Rare!)"];
-        let wrongAttempts = 0, popupStage = 1, popupFails = 0, noCount = 0, hasClaimed = false;
+        const quotes = [
+            "Your love is my inspiration. ❤️",
+            "In your smile, I see my future. ✨",
+            "You are the best thing that ever happened to me. 💍",
+            "I'm yours and you're mine, forever. 💏",
+            "My love for you grows every second! 💋",
+            "You are my queen, my world, my everything. 👑"
+        ];
+        let wrongAttempts = 0, popupStage = 1, popupFails = 0, noCount = 0, hasClaimed = false, loveProgress = 0;
 
         const reel = document.getElementById('reel');
         const poolList = document.getElementById('prizePoolList');
@@ -1052,7 +1113,6 @@
         function handleSelection(choice) {
             if (choice === "Why not? YES! 💍") { startConstellation(); return; }
 
-            // UPDATED: Handle "I am already yours"
             if (choice === "I am already yours! ❤️") {
                 startVideoFlow();
                 return;
@@ -1061,10 +1121,36 @@
             document.getElementById('page3Scroll').style.display = 'none';
             if (choice === "YES, definitely! ❤️") {
                 document.getElementById('page4Love').style.display = 'flex';
+                resetLoveMeter();
                 createBokeh();
                 confetti({ particleCount: 200, spread: 100 });
             } else {
                 document.getElementById('page5Game').style.display = 'flex';
+            }
+        }
+
+        function resetLoveMeter() {
+            loveProgress = 0;
+            document.getElementById('meterFill').style.width = '0%';
+            document.getElementById('quoteText').innerText = 'Tap the crystal heart to fill it with your love...';
+            document.getElementById('loveStatus').innerHTML = '';
+            document.getElementById('finalActionBtn').style.display = 'none';
+        }
+
+        function fillLoveMeter() {
+            if (loveProgress >= 100) return;
+            loveProgress += 12.5; // 8 clicks to full
+            if (loveProgress > 100) loveProgress = 100;
+
+            document.getElementById('meterFill').style.width = loveProgress + '%';
+            document.getElementById('quoteText').innerText = quotes[Math.floor(loveProgress / 18) % quotes.length];
+
+            heartBlast();
+
+            if (loveProgress === 100) {
+                document.getElementById('loveStatus').innerHTML = "<h2 style='color:#ff3232; font-size: 1.8rem; animation: pulse 1s infinite;'>I LOVE YOU SO MUCH DI! ❤️💋</h2>";
+                document.getElementById('finalActionBtn').style.display = 'block';
+                confetti({ particleCount: 400, spread: 150, origin: { y: 0.6 } });
             }
         }
 
