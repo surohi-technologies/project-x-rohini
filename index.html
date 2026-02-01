@@ -406,7 +406,8 @@
             animation: fadeIn 1s forwards;
         }
 
-        #page4Love {
+        #page4Love,
+        #page7Unexpected {
             display: none;
             position: fixed;
             inset: 0;
@@ -974,7 +975,7 @@
                         <h2>Will you be my Valentine? 💍</h2>
                         <div id="btnContainer"
                             style="display: flex; justify-content: center; align-items: center; min-height: 300px; position: relative; flex-wrap: wrap;">
-                            <button id="yesBtn" class="royal-btn" onclick="handleSelection('YES, definitely! ❤️')">YES
+                            <button id="yesBtn" class="royal-btn" onclick="handleSelection('YES ❤️')">YES
                                 ❤️</button>
                             <button id="noBtn" class="royal-btn" onmouseover="fleeNo()">NO 💀</button>
                         </div>
@@ -987,6 +988,23 @@
                     <div style="font-size: 2.5rem; margin-top:20px;">❤️</div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="page7Unexpected">
+        <div class="silky-bg"></div>
+        <div class="love-content-card">
+            <h1 style="font-size: 2.22rem; margin-bottom: 20px;">I Didn't Expect That! 😍</h1>
+            <p style="font-size: 1.3rem; line-height: 1.6;">
+                You said YES so fast! My heart just skipped 1000 beats. ❤️<br><br>
+                But my queen, I've put so much effort into this... <br>
+                <b>I want you to see everything!</b>
+            </p>
+            <p class="lovely-note">
+                Go back and explore the other options too di... real surprise anga dhaan irukku! 😘🔥
+            </p>
+            <button class="royal-btn" style="margin-top: 30px;" onclick="backToScroll('page7Unexpected')">Okay,
+                Checking Other Options! 🏃‍♀️💨</button>
         </div>
     </div>
 
@@ -1118,8 +1136,15 @@
                 return;
             }
 
+            if (choice === "YES ❤️") {
+                document.getElementById('page3Scroll').style.display = 'none';
+                document.getElementById('page7Unexpected').style.display = 'flex';
+                confetti({ particleCount: 150, spread: 70 });
+                return;
+            }
+
             document.getElementById('page3Scroll').style.display = 'none';
-            if (choice === "YES, definitely! ❤️") {
+            if (choice === "YES, definitely! ❤️" || choice === "I've been waiting for this! 😍") {
                 document.getElementById('page4Love').style.display = 'flex';
                 resetLoveMeter();
                 createBokeh();
